@@ -67,16 +67,14 @@ export const QueueTab = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-2xl font-bold mb-6">Repair Queue</h2>
-      
+    <div className="flex flex-col gap-4">
       {queueItems.length === 0 ? (
         <div className="text-center py-12 text-gray-400">
           <p className="text-lg">No items in queue</p>
           <p className="text-sm">Items will appear here when crafting begins</p>
         </div>
       ) : (
-        queueItems.map((item) => {
+        queueItems.map((item, index) => {
           const progress = calculateProgress(item);
           const remainingTime = getRemainingTime(item);
           const isCompleted = progress >= 100;
@@ -84,39 +82,73 @@ export const QueueTab = () => {
           return (
             <div 
               key={item.id} 
-              className={`glass-morphism rounded-xl p-6 transition-all duration-300 ${
-                isCompleted ? 'animate-pulse border-green-500' : ''
-              }`}
+              className="bg-[#121624] rounded-xl overflow-hidden"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-white">{item.name}</h3>
-                  <p className="text-gray-300 text-sm mt-1">
-                    {formatTime(item.startTime)} - {formatTime(item.endTime)}
-                  </p>
+              <div className="flex items-stretch h-24">
+                {/* Left Side - Item Info */}
+                <div className="flex-1 p-4 flex flex-col justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold">{index + 1}</span>
+                    <span className="text-lg font-medium">{item.name}</span>
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    <span>Start Time</span>
+                    <div className="text-white text-sm mt-0.5">{formatTime(item.startTime)}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-purple-400">{progress}%</div>
-                  <div className="text-sm text-gray-300">{remainingTime}</div>
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="relative">
-                <div className="w-full bg-gray-700 rounded-full h-3">
-                  <div 
-                    className={`h-3 rounded-full transition-all duration-1000 ${
-                      isCompleted 
-                        ? 'bg-green-500 progress-glow' 
-                        : 'bg-gradient-to-r from-purple-600 to-purple-400'
-                    }`}
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-xs font-medium text-white drop-shadow-lg">
-                    {isCompleted ? 'Complete!' : 'Ongoing'}
-                  </span>
+
+                {/* Right Side - Progress Circle */}
+                <div className="flex-1 flex items-center justify-center relative">
+                  <div className="w-20 h-20 relative flex items-center justify-center">
+                    {/* Circular Progress Background */}
+                    <svg className="w-full h-full absolute" viewBox="0 0 100 100">
+                      <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="40" 
+                        fill="transparent"
+                        stroke="#2A2A3C" 
+                        strokeWidth="10"
+                      />
+                    </svg>
+                    
+                    {/* Circular Progress Indicator */}
+                    <svg className="w-full h-full absolute -rotate-90" viewBox="0 0 100 100">
+                      <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="40" 
+                        fill="transparent"
+                        stroke={isCompleted ? "#00FF85" : "#9333EA"} 
+                        strokeWidth="10" 
+                        strokeDasharray="251.2" 
+                        strokeDashoffset={251.2 - (251.2 * progress) / 100}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000 ease-in-out"
+                      />
+                    </svg>
+                    
+                    {/* Progress Text */}
+                    <div className="absolute inset-0 flex items-center justify-center flex-col">
+                      <span className="text-lg font-bold flex items-center">
+                        {isCompleted ? 
+                          <span className="text-[#00FF85]">100%</span> : 
+                          <>
+                            <span className="text-purple-500">&#x276F;</span>
+                            <span>{progress}%</span>
+                          </>
+                        }
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="absolute right-4 bottom-4 flex flex-col items-end">
+                    <div className="text-xs text-gray-400">End Time</div>
+                    <div className="text-sm">{formatTime(item.endTime)}</div>
+                    <div className="text-xs mt-0.5 text-gray-400">
+                      {isCompleted ? "Completed" : "Ongoing"}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
