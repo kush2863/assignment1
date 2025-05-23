@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Hammer, CheckCircle } from 'lucide-react';
 import advancedkit from '/public/advancedkit.svg';
+import { Separator } from '@/components/ui/separator';
 
 interface QueueItem {
   id: string;
@@ -10,7 +11,7 @@ interface QueueItem {
   type: string;
 }
 
-export const QueueTab = () => {
+const QueueTab = () => {
   const [queueItems, setQueueItems] = useState<QueueItem[]>([
     {
       id: '1',
@@ -83,71 +84,110 @@ export const QueueTab = () => {
           return (
             <div
               key={item.id}
-              className="flex flex-col bg-gradient-to-b from-[#23242B] to-[#181922] rounded-2xl px-4 py-4 min-h-[170px] gap-2 w-full max-w-[350px] mx-auto"
+              className="w-[297px] rounded-[0px_0px_10px_10px] border-[2px] border-white/20 [background:linear-gradient(180deg,rgba(18,22,36,0)_0%,rgba(18,22,36,1)_100%)] mx-auto mb-[15px]"
             >
-              {/* Top: Number, Image, Name */}
-              <div className="flex flex-row items-center gap-3 w-full">
-                <div className="text-xl font-bold text-white">{index + 1}</div>
-                <img src={advancedkit} alt="item" className="w-[40px] h-[40px] object-contain" />
-                <div className="flex flex-col">
-                  <div className="text-base font-bold text-white leading-tight">{item.name}</div>
-                  <div className="text-xs text-gray-400 leading-tight">Start Time <span className="text-white font-semibold">{formatTime(item.startTime)}</span></div>
-                </div>
-              </div>
-              {/* Progress Ring Centered */}
-              <div className="flex flex-col items-center w-full mt-2">
-                <div className="w-[150px] h-[100px] relative flex items-center justify-center overflow-hidden">
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 150 100">
-                    <path
-                      d="M 15 90 A 60 60 0 0 1 135 90"
-                      fill="none"
-                      stroke="rgba(148, 163, 184, 0.2)"
-                      strokeWidth="14"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  {/* Progress semicircle */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 150 100">
-                    <path
-                      d="M 15 90 A 60 60 0 0 1 135 90"
-                      fill="none"
-                      stroke={isCompleted ? "#10B981" : "url(#progressGradient)"}
-                      strokeWidth="14"
-                      strokeLinecap="round"
-                      strokeDasharray="188.4"
-                      strokeDashoffset={188.4 - (188.4 * progress) / 100}
-                      className="transition-all duration-1000 ease-out"
-                    />
-                    <defs>
-                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#2737CF" />
-                        <stop offset="100%" stopColor="#DA1A41" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  {/* Progress percentage */}
-                  <div className="absolute inset-0 flex items-center justify-center flex-col mt-8">
-                    {isCompleted ? (
-                      <CheckCircle className="w-6 h-6 text-green-400" />
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <Hammer className="w-6 h-6 text-purple-400" />
-                        <span className="text-2xl font-extrabold text-white">{progress}%</span>
-                      </span>
-                    )}
+              <div className="flex flex-col items-center gap-2 p-2">
+                <div className="flex items-center gap-1 w-full">
+                  <div className="flex flex-wrap items-center gap-[2px_2px] flex-1">
+                    <div className="[font-family:'Inter',Helvetica] font-semibold text-white text-[17px]">
+                      {index + 1}
+                    </div>
+                    <div className="w-[51px] flex flex-col gap-0.5">
+                      <div className="opacity-60 [font-family:'Inter',Helvetica] font-normal text-white text-[6.5px]">
+                        Name
+                      </div>
+                      <div className="w-[75px] flex items-center gap-2.5 mr-[-24.00px] overflow-hidden">
+                        <div className="[font-family:'Inter',Helvetica] font-semibold text-white text-[11px] tracking-[-0.16px] leading-[10.5px] whitespace-nowrap">
+                          {item.name}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <Separator orientation="vertical" className="h-[20.5px]" />
+                  <div className="relative w-[90.25px] h-[45.5px]">
+                    <div className="relative w-[90px] h-[45px]">
+                      <div className="w-[34px] items-center absolute top-[21px] left-7 flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1 w-full mt-1">
+                          <Hammer className="w-[8.75px] h-[8.75px] text-purple-400" />
+                          <div className={`[font-family:'Inter',Helvetica] font-semibold text-white text-xs ${progress === 100 ? "mr-[-8.25px]" : "mr-[-1.25px]"}`}>
+                            {progress}%
+                          </div>
+                        </div>
+                      </div>
+                      {/* Progress ring SVGs here, keep dynamic logic */}
+                      <svg className="absolute w-[85px] h-[42px] top-[3px] left-[3px]" viewBox="0 0 150 100">
+                        <path
+                          d="M 15 90 A 60 60 0 0 1 135 90"
+                          fill="none"
+                          stroke="rgba(148, 163, 184, 0.2)"
+                          strokeWidth="14"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      <svg className="absolute h-[42px] top-[3px] left-[3px]" width="85" height="42" viewBox="0 0 150 100">
+                        <path
+                          d="M 15 90 A 60 60 0 0 1 135 90"
+                          fill="none"
+                          stroke={isCompleted ? "#10B981" : "url(#progressGradient)"}
+                          strokeWidth="14"
+                          strokeLinecap="round"
+                          strokeDasharray="188.4"
+                          strokeDashoffset={188.4 - (188.4 * progress) / 100}
+                          className="transition-all duration-1000 ease-out"
+                        />
+                        <defs>
+                          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#2737CF" />
+                            <stop offset="100%" stopColor="#DA1A41" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <svg className="absolute w-[90px] h-[45px] top-0 left-0" viewBox="0 0 150 100">
+                        <path
+                          d="M 15 90 A 60 60 0 0 1 135 90"
+                          fill="none"
+                          stroke="#fff"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          opacity="0.2"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <Separator orientation="vertical" className="h-[20.5px]" />
+                  <div className="flex flex-wrap items-center gap-[2px_2px] flex-1">
+                    <div className="[font-family:'Inter',Helvetica] font-semibold text-white text-[17px] px-1">
+                      {isCompleted ? '0' : remainingTime.replace(/m.*/, '')}
+                    </div>
+                    <div className="flex flex-col gap-0.5 flex-1">
+                      <div className="opacity-60 [font-family:'Inter',Helvetica] font-normal text-white text-[6.5px]">
+                        Remaining
+                      </div>
+                      <div className="[font-family:'Inter',Helvetica] font-semibold text-white text-[11px] tracking-[-0.16px] leading-[10.5px] whitespace-nowrap">
+                        Time
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* Bottom: Time Info Row */}
-              <div className="flex flex-row justify-between items-center w-full mt-2">
-                <div className="flex flex-col items-start">
-                  <div className="text-xs text-gray-400">Remaining</div>
-                  <div className="text-lg font-bold text-white">{isCompleted ? '0' : remainingTime.split(' ')[0]}</div>
-                  <div className="text-xs text-gray-400">Time</div>
-                </div>
-                <div className="flex flex-col items-end">
-                  <div className="text-xs text-gray-400">End Time</div>
-                  <div className="text-base font-semibold text-white">{isCompleted ? 'Ongoing' : formatTime(item.endTime)}</div>
+                <Separator orientation="vertical" className="h-[20.5px]" />
+                <div className="flex items-center justify-center gap-[13px] w-full">
+                  <div className="flex flex-col items-center gap-0.5 flex-1">
+                    <div className="opacity-60 [font-family:'Inter',Helvetica] font-normal text-white text-[6.5px]">
+                      Start Time
+                    </div>
+                    <div className="[font-family:'Inter',Helvetica] font-semibold text-white text-[11px] text-center tracking-[-0.16px] leading-[10.5px] w-full">
+                      {formatTime(item.startTime)}
+                    </div>
+                  </div>
+                  <Separator orientation="vertical" className="h-full" />
+                  <div className="flex flex-col items-center gap-0.5 flex-1">
+                    <div className="opacity-60 [font-family:'Inter',Helvetica] font-normal text-white text-[6.5px]">
+                      End Time
+                    </div>
+                    <div className="[font-family:'Inter',Helvetica] font-semibold text-white text-[11px] text-center tracking-[-0.16px] leading-[10.5px] w-full">
+                      {isCompleted ? 'Ongoing' : formatTime(item.endTime)}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
