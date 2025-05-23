@@ -13,6 +13,7 @@ interface DragState {
   isDragging: boolean;
   draggedItem: InventoryItem | null;
   draggedQuantity: number;
+  source: 'inventory' | 'crafting' | null;
 }
 
 export const TableTab = () => {
@@ -37,20 +38,22 @@ export const TableTab = () => {
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
     draggedItem: null,
-    draggedQuantity: 0
+    draggedQuantity: 0,
+    source: null
   });
 
-  const [history] = useState([
-    { id: 'h1', name: 'Repair Kit', date: '2024-06-17 16:07', icon: '🧰' },
-    { id: 'h2', name: 'Bolt Assembly', date: '2024-02-17 11:26', icon: '🔩' },
-    { id: 'h3', name: 'Hammer P', date: '2024-01-01 08:15', icon: '🔨' }
-  ]);
-
-  const handleDragStart = (item: InventoryItem, source: 'inventory' | 'crafting') => {
+  const handleDragStart = (e: React.DragEvent, item: InventoryItem, source: 'inventory' | 'crafting') => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', JSON.stringify({
+      itemId: item.id,
+      source: source
+    }));
+    
     setDragState({
       isDragging: true,
-      draggedItem: { ...item, source } as any,
-      draggedQuantity: Math.min(item.quantity, 1)
+      draggedItem: item,
+      draggedQuantity: Math.min(item.quantity, 1),
+      source: source
     });
   };
 
@@ -58,81 +61,110 @@ export const TableTab = () => {
     setDragState({
       isDragging: false,
       draggedItem: null,
-      draggedQuantity: 0
+      draggedQuantity: 0,
+      source: null
     });
   };
 
-  const handleDrop = (target: 'inventory' | 'crafting') => {
-    if (!dragState.draggedItem) return;
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
 
-    const sourceIsInventory = (dragState.draggedItem as any).source === 'inventory';
-    const targetIsInventory = target === 'inventory';
-
-    if (sourceIsInventory === targetIsInventory) {
-      handleDragEnd();
-      return;
+  const handleDrop = (e: React.DragEvent, target: 'inventory' | 'crafting') => {
+    e.preventDefault();
+    
+    try {
+      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+      const itemId = data.itemId;
+      const source = data.source;
+      
+      if (!itemId || !source || source === target) {
+        return;
+      }
+      
+      if (source === 'inventory' && target === 'crafting') {
+        moveItemFromInventoryToCrafting(itemId);
+      } else if (source === 'crafting' && target === 'inventory') {
+        moveItemFromCraftingToInventory(itemId);
+      }
+    } catch (error) {
+      console.error("Error processing drop:", error);
     }
-
-    const moveQuantity = dragState.draggedQuantity;
-    const itemId = dragState.draggedItem.id;
-
-    if (sourceIsInventory) {
-      // Moving from inventory to crafting table
-      setInventory(prev => prev.map(item => 
-        item.id === itemId 
-          ? { ...item, quantity: item.quantity - moveQuantity }
-          : item
-      ).filter(item => item.quantity > 0));
-
-      setCraftingTable(prev => {
-        const existingItem = prev.find(item => item.name === dragState.draggedItem!.name);
-        if (existingItem) {
-          return prev.map(item => 
-            item.name === dragState.draggedItem!.name
-              ? { ...item, quantity: item.quantity + moveQuantity }
-              : item
-          );
-        } else {
-          return [...prev, { 
-            ...dragState.draggedItem!, 
-            id: `craft_${Date.now()}`,
-            quantity: moveQuantity 
-          }];
-        }
-      });
-    } else {
-      // Moving from crafting table to inventory
-      setCraftingTable(prev => prev.map(item => 
-        item.id === itemId 
-          ? { ...item, quantity: item.quantity - moveQuantity }
-          : item
-      ).filter(item => item.quantity > 0));
-
-      setInventory(prev => {
-        const existingItem = prev.find(item => item.name === dragState.draggedItem!.name);
-        if (existingItem) {
-          return prev.map(item => 
-            item.name === dragState.draggedItem!.name
-              ? { ...item, quantity: item.quantity + moveQuantity }
-              : item
-          );
-        } else {
-          return [...prev, { 
-            ...dragState.draggedItem!, 
-            id: `inv_${Date.now()}`,
-            quantity: moveQuantity 
-          }];
-        }
-      });
-    }
-
+    
     handleDragEnd();
+  };
+
+  const moveItemFromInventoryToCrafting = (itemId: string) => {
+    const itemToMove = inventory.find(item => item.id === itemId);
+    if (!itemToMove) return;
+
+    const moveQuantity = Math.min(itemToMove.quantity, 1);
+
+    // Remove from inventory or update quantity
+    setInventory(prev => prev.map(item => 
+      item.id === itemId 
+        ? { ...item, quantity: item.quantity - moveQuantity }
+        : item
+    ).filter(item => item.quantity > 0));
+
+    // Add to crafting table or update quantity
+    setCraftingTable(prev => {
+      const existingItem = prev.find(item => item.name === itemToMove.name);
+      
+      if (existingItem) {
+        return prev.map(item => 
+          item.name === itemToMove.name
+            ? { ...item, quantity: item.quantity + moveQuantity }
+            : item
+        );
+      } else {
+        return [...prev, { 
+          ...itemToMove, 
+          id: `craft_${Date.now()}`,
+          quantity: moveQuantity 
+        }];
+      }
+    });
+  };
+
+  const moveItemFromCraftingToInventory = (itemId: string) => {
+    const itemToMove = craftingTable.find(item => item.id === itemId);
+    if (!itemToMove) return;
+
+    const moveQuantity = Math.min(itemToMove.quantity, 1);
+
+    // Remove from crafting table or update quantity
+    setCraftingTable(prev => prev.map(item => 
+      item.id === itemId 
+        ? { ...item, quantity: item.quantity - moveQuantity }
+        : item
+    ).filter(item => item.quantity > 0));
+
+    // Add to inventory or update quantity
+    setInventory(prev => {
+      const existingItem = prev.find(item => item.name === itemToMove.name);
+      
+      if (existingItem) {
+        return prev.map(item => 
+          item.name === itemToMove.name
+            ? { ...item, quantity: item.quantity + moveQuantity }
+            : item
+        );
+      } else {
+        return [...prev, { 
+          ...itemToMove, 
+          id: `inv_${Date.now()}`,
+          quantity: moveQuantity 
+        }];
+      }
+    });
   };
 
   const ItemCard = ({ item, source }: { item: InventoryItem; source: 'inventory' | 'crafting' }) => (
     <div
       draggable
-      onDragStart={() => handleDragStart(item, source)}
+      onDragStart={(e) => handleDragStart(e, item, source)}
       onDragEnd={handleDragEnd}
       className="glass-morphism rounded-lg p-4 cursor-grab active:cursor-grabbing hover:bg-white/10 transition-all duration-200 group"
     >
@@ -158,8 +190,8 @@ export const TableTab = () => {
             className={`glass-morphism rounded-xl p-6 min-h-[400px] transition-all duration-200 ${
               dragState.isDragging ? 'border-purple-500 border-2 border-dashed' : ''
             }`}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => handleDrop('inventory')}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'inventory')}
           >
             <div className="grid grid-cols-3 gap-4">
               {inventory.map((item) => (
@@ -176,8 +208,8 @@ export const TableTab = () => {
             className={`glass-morphism rounded-xl p-6 min-h-[400px] transition-all duration-200 ${
               dragState.isDragging ? 'border-purple-500 border-2 border-dashed' : ''
             }`}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => handleDrop('crafting')}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'crafting')}
           >
             <div className="grid grid-cols-3 gap-4">
               {craftingTable.map((item) => (

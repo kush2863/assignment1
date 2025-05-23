@@ -88,7 +88,7 @@
 
 @layer utilities {
   .crafting-gradient {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 25%, #3730a3  50%, #1e293b  75%, #0f172a 100%);
+    background: linear-gradient(135deg, #121624 0%, #121624 25%, #121624 50%, #121624 75%, #12162400 100%);
   }
   
   .glass-morphism {
