@@ -98,24 +98,26 @@ export const QueueTab = () => {
                   </div>
                 </div>
 
-                {/* Right Side - Progress Ring (Semi-Circle) */}
+                {/* Right Side - Progress Ring */}
                 <div className="flex-1 flex items-center justify-center relative">
-                  <div className="w-[90.25px] h-[45.5px] relative flex items-center justify-center overflow-hidden">
-                    {/* Outline - Outer Half Circle */}
-                    <div className="absolute left-0 right-0 top-0 h-full rounded-t-full bg-[rgba(39,55,207,0.3)]"></div>
+                  <div className="w-[90.25px] h-[90.25px] relative flex items-center justify-center">
+                    {/* Outline - Outer Circle */}
+                    <div className="absolute left-0 right-0 top-0.12 bottom-0 rounded-full bg-[rgba(39,55,207,0.3)]"></div>
                     
                     {/* Base - Progress Background */}
-                    <div className="absolute left-[2.75px] right-[2.5px] top-[2.75px] bottom-0 rounded-t-full bg-[rgba(39,55,207,0.3)]"></div>
+                    <div className="absolute left-[2.75px] right-[2.5px] top-[2.75px] bottom-[2.75px] rounded-full bg-[rgba(39,55,207,0.3)]"></div>
                     
                     {/* Semi-Circle Progress */}
-                    <svg className="absolute inset-0 w-full h-full -rotate-180 origin-bottom" viewBox="0 0 100 50">
-                      <path
-                        d="M 100,50 A 50,50 0 0,1 0,50"
-                        fill="none"
-                        stroke={isCompleted ? "#00FF85" : "url(#progressGradient)"}
-                        strokeWidth="10"
-                        strokeDasharray="157"
-                        strokeDashoffset={157 - (157 * progress) / 100}
+                    <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                      <circle 
+                        cx="50" 
+                        cy="50" 
+                        r="40" 
+                        fill="transparent"
+                        stroke={isCompleted ? "#00FF85" : "url(#progressGradient)"} 
+                        strokeWidth="10" 
+                        strokeDasharray="251.2" 
+                        strokeDashoffset={251.2 - (251.2 * progress) / 100}
                         strokeLinecap="round"
                         className="transition-all duration-1000 ease-in-out"
                       />
@@ -130,8 +132,8 @@ export const QueueTab = () => {
                     </svg>
                     
                     {/* Progress Content */}
-                    <div className="absolute" style={{ left: 'calc(50% - 17.25px)', top: '21px' }}>
-                      <div className="flex items-center gap-2">
+                    <div className="absolute inset-0 flex items-center justify-center flex-col">
+                      <div className="flex items-center gap-1">
                         <Hammer size={9} className="text-[#77C2BA]" />
                         <span className={`text-xs font-semibold ${isCompleted ? "text-[#00FF85]" : "text-white"}`}>
                           {progress}%
